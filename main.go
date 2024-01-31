@@ -2,13 +2,18 @@ package main
 
 import (
 	"fmt"
+	"go-etax/handler"
 	"go-etax/repository"
+	"go-etax/service"
 
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 )
 
 func main() {
+	app := fiber.New()
+
 	dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s", "sa", "P@ssw0rd", "127.0.0.1", 1433, "TestDB")
 	db, err := gorm.Open(sqlserver.Open(dsn))
 	if err != nil {
@@ -16,14 +21,10 @@ func main() {
 	}
 
 	etaxTableRepository := repository.NewEtaxTableRepositoryDb(db)
-	_ = etaxTableRepository
+	etaxTableService := service.NewEtaxTableService(etaxTableRepository)
+	etaxTableHandler := handler.NewEtaxTableHandler(etaxTableService)
 
-	etaxTables, err := etaxTableRepository.SqlGetAll()
-	if err != nil {
-		panic(err)
-	}
+	app.Get("/etax", etaxTableHandler.SendEtaxToEco)
 
-	fmt.Print(etaxTables)
-
-	etaxTableRepository.SqlUpdate(&etaxTables[0])
+	app.Listen(":8888")
 }
