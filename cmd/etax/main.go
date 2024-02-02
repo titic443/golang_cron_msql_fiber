@@ -66,7 +66,7 @@ func main() {
 	etaxTableHandler := handler.NewEtaxTableHandler(etaxTableService)
 	app.Get("/etax", etaxTableHandler.SendEtaxToEco)
 
-	logs.Log.Info("App Sign ETAX listening on port" + viper.GetString("app.port"))
+	logs.Info("App Sign ETAX listening on port" + viper.GetString("app.port"))
 	app.Listen(":8888")
 }
 
