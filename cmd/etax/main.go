@@ -3,20 +3,27 @@ package main
 import (
 	"fmt"
 	"go-etax/handler"
+	"go-etax/internal/logs"
 	"go-etax/internal/repository"
 	"go-etax/internal/service"
 	"net"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hirochachacha/go-smb2"
+	"github.com/spf13/viper"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 )
 
 func main() {
 	var err error
-	conn, err := net.Dial("tcp", "10.15.5.4:445")
+	initConfig()
+	initTimeZone()
+	dsn := fmt.Sprintf("%v:%v", viper.GetString("smb.hostname"), viper.GetString("smb.port"))
+	conn, err := net.Dial("tcp", dsn)
 	if err != nil {
 		panic(err)
 	}
@@ -37,9 +44,6 @@ func main() {
 	defer client.Logoff()
 	defer conn.Close()
 
-	// fileshareRepository := repository.NewfileshareRepository(client, "10.15.5.4")
-	// _ = fileshareRepository
-
 	app := fiber.New(fiber.Config{
 		Prefork: false,
 	})
@@ -49,7 +53,7 @@ func main() {
 		os.Mkdir("./download", 0777)
 	}
 
-	dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s", "sa", "P@ssw0rd", "127.0.0.1", 1433, "TestDB")
+	dsn = fmt.Sprintf("sqlserver://%s:%s@%s:%v?database=%s", viper.GetString("db.username"), viper.GetString("db.password"), viper.GetString("db.hostname"), viper.GetInt("db.port"), viper.GetString("db.db"))
 	db, err := gorm.Open(sqlserver.Open(dsn))
 	if err != nil {
 		panic(err)
@@ -62,5 +66,28 @@ func main() {
 	etaxTableHandler := handler.NewEtaxTableHandler(etaxTableService)
 	app.Get("/etax", etaxTableHandler.SendEtaxToEco)
 
+	logs.Log.Info("App Sign ETAX listening on port" + viper.GetString("app.port"))
 	app.Listen(":8888")
+}
+
+func initConfig() {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+}
+
+func initTimeZone() {
+	ict, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		panic(err)
+	}
+
+	time.Local = ict
 }

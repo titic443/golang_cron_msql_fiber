@@ -1,0 +1,16 @@
+app:
+  port: 8888
+
+db:
+  username: sa
+  password: P@ssw0rd
+  hostname: 127.0.0.1
+  port: 1433
+  db: TestDB
+
+smb:
+  hostname: 10.15.5.4
+  port: 445
+  username: titi.cha
+  passwor: For+ever17!
+  domain: energyabsolute

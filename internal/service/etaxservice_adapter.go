@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"go-etax/internal/repository"
 	"log"
 	"strings"
@@ -57,7 +58,9 @@ func (s etaxService) SignEtax() ([]ResponseData, error) {
 			continue
 		}
 		response.DocData = docData
-		s.Transform(&response.DocData)
+		t, _ := s.Transform(&response.DocData)
+		_ = t
+		fmt.Println(response.DocData)
 		// b, f := strings.CutSuffix(response.DocData.DOCUMENT_ISSUE_DTM, "Z")
 		// if f == true {
 
@@ -81,7 +84,7 @@ func (s etaxService) SignEtax() ([]ResponseData, error) {
 	return responses, nil
 }
 
-func (s etaxService) Transform(p *DocData) {
+func (s etaxService) Transform(p *DocData) (*DocData, error) {
 	if len(p.LineItemInformation) > 0 {
 		for _, lineItem := range p.LineItemInformation {
 			ok := strings.Contains(lineItem.LINE_TAX_TYPE_CODE, "VUD")
@@ -103,6 +106,7 @@ func (s etaxService) Transform(p *DocData) {
 		p.REF_DOCUMENT_ISSUE_DTM = ""
 		p.REF_DOCUMENT_TYPE_CODE = ""
 	}
+	return p, nil
 }
 
 func (s etaxService) EncodePdf(docId string) (*string, error) {
