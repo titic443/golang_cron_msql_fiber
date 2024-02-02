@@ -1,9 +1,5 @@
 package service
 
-import (
-	"time"
-)
-
 type ResponseData struct {
 	FORM_TYPE   string  `json:"form_type"`
 	FORM_NAME   string  `json:"form_name"`
@@ -17,7 +13,7 @@ type DocData struct {
 	CURRENCY_CODE           string                `json:"currency_code"`
 	DOCUMENT_TYPE_CODE      string                `json:"document_type_code"`
 	DOCUMENT_ID             string                `json:"document_id"`
-	DOCUMENT_ISSUE_DTM      time.Time             `json:"document_issue_dtm"`
+	DOCUMENT_ISSUE_DTM      string                `json:"document_issue_dtm"`
 	CREATE_PURPOSE_CODE     string                `json:"create_purpose_code"`
 	CREATE_PURPOSE          string                `json:"create_purpose"`
 	REF_DOCUMENT_ID         string                `json:"ref_document_id"`
@@ -50,9 +46,9 @@ type DocData struct {
 type LineItemInformation struct {
 	PRODUCT_CODE       string  `json:"product_code"`
 	PRODUCT_NAME       string  `json:"product_name"`
-	PRODUCT_PRICE      float64 `json:"line_tax_type_code"`
-	PRODUCT_QUANTITY   int     `json:"product_price"`
-	LINE_TAX_TYPE_CODE string  `json:"product_quantity"`
+	LINE_TAX_TYPE_CODE string  `json:"line_tax_type_code"`
+	PRODUCT_PRICE      float64 `json:"product_price"`
+	PRODUCT_QUANTITY   float64 `json:"product_quantity"`
 	LINE_TAX_RATE      int     `json:"line_tax_rate"`
 	LINE_BASE_AMOUNT   int     `json:"line_base_amount"`
 	LINE_TAX_AMOUNT    int     `json:"line_tax_amount"`
@@ -61,4 +57,5 @@ type LineItemInformation struct {
 
 type EtaxService interface {
 	SignEtax() ([]ResponseData, error)
+	EncodePdf(string) (*string, error)
 }

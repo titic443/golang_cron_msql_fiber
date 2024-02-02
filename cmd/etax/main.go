@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"go-etax/handler"
-	"go-etax/repository"
-	"go-etax/service"
+	"go-etax/internal/repository"
+	"go-etax/internal/service"
 	"net"
 	"os"
 
@@ -15,16 +15,16 @@ import (
 )
 
 func main() {
+	var err error
 	conn, err := net.Dial("tcp", "10.15.5.4:445")
 	if err != nil {
 		panic(err)
 	}
-	defer conn.Close()
 
 	d := &smb2.Dialer{
 		Initiator: &smb2.NTLMInitiator{
 			User:     "titi.cha",
-			Password: "For+ever16!",
+			Password: "For+ever17!",
 			Domain:   "energyabsolute",
 		},
 	}
@@ -33,10 +33,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer c.Logoff()
 
-	fileshareRepository := repository.NewfileshareRepository(client)
-	// fileshareRepository.DownloadFile("smb://10.15.5.4/it-data$/TESTApp")
+	defer client.Logoff()
+	defer conn.Close()
+
+	// fileshareRepository := repository.NewfileshareRepository(client, "10.15.5.4")
+	// _ = fileshareRepository
+
 	app := fiber.New(fiber.Config{
 		Prefork: false,
 	})
@@ -54,7 +57,8 @@ func main() {
 
 	etaxTableRepository := repository.NewEtaxTableRepositoryDb(db)
 	etaxTransRepository := repository.NewEtaxTransRepositoryDb(db)
-	etaxTableService := service.NewEtaxTableService(etaxTableRepository, etaxTransRepository)
+	fileshareRepository := repository.NewfileshareRepository(client, "it-data$", "TESTApp")
+	etaxTableService := service.NewEtaxTableService(etaxTableRepository, etaxTransRepository, fileshareRepository)
 	etaxTableHandler := handler.NewEtaxTableHandler(etaxTableService)
 	app.Get("/etax", etaxTableHandler.SendEtaxToEco)
 
