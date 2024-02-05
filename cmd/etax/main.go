@@ -53,8 +53,8 @@ func main() {
 		os.Mkdir("./download", 0777)
 	}
 
-	dsn = fmt.Sprintf("sqlserver://%s:%s@%s:%v?database=%s", viper.GetString("db.username"), viper.GetString("db.password"), viper.GetString("db.hostname"), viper.GetInt("db.port"), viper.GetString("db.db"))
-	db, err := gorm.Open(sqlserver.Open(dsn))
+	dsn = fmt.Sprintf("sqlserver://%s:%s@%s:%v?database=%s&encrypt=disable&connection+timeout=30", viper.GetString("db.username"), viper.GetString("db.password"), viper.GetString("db.hostname"), viper.GetInt("db.port"), viper.GetString("db.db"))
+	db, err := gorm.Open(sqlserver.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

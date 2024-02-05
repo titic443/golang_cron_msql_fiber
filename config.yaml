@@ -2,11 +2,11 @@ app:
   port: 8888
 
 db:
-  username: sa
-  password: P@ssw0rd
-  hostname: 127.0.0.1
+  username: DevEtx
+  password: Dev2024$$E@Tax
+  hostname: 192.168.14.222
   port: 1433
-  db: TestDB
+  db: EAVCAX62LIVE
 
 smb:
   hostname: 10.15.5.4

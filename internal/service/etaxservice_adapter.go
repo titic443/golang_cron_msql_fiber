@@ -1,9 +1,8 @@
 package service
 
 import (
-	"fmt"
+	"go-etax/internal/logs"
 	"go-etax/internal/repository"
-	"log"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
@@ -22,66 +21,60 @@ func NewEtaxTableService(etaxTableRepo repository.EtaxTableRepository, etaxTrans
 func (s etaxService) SignEtax() ([]ResponseData, error) {
 	etaxTables, err := s.etaxTableRepo.SqlGetAll()
 	if err != nil {
+		logs.Error(err)
 		return nil, err
 	}
-	var responses []ResponseData
-	var lineInformations []LineItemInformation
-	for _, etaxTable := range etaxTables {
-		var response ResponseData
-		var docData DocData
-		if mapstructure.Decode(etaxTable, &response); err != nil {
-			log.Println(err)
-		}
-		o, err := s.EncodePdf(etaxTable.DOCUMENT_ID)
-		if err != nil {
-			log.Println(err)
-		}
-		response.PDF_CONTENT = *o
+	if len(etaxTables) != 0 {
+		var responses []ResponseData
+		var lineInformations []LineItemInformation
+		for _, etaxTable := range etaxTables {
+			var response ResponseData
+			var docData DocData
+			if mapstructure.Decode(etaxTable, &response); err != nil {
+				logs.Error(err)
+				// return nil, err
+			}
+			o, err := s.EncodePdf(etaxTable.DOCUMENT_ID)
+			if err != nil {
+				logs.Error(err)
+				// return nil, err
+			}
+			response.PDF_CONTENT = *o
 
-		rs, err := s.etaxTransRepo.GetById(etaxTable.DOCUMENT_ID, etaxTable.COMPANY)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		for _, r := range rs {
-			var lineInformation LineItemInformation
-			if mapstructure.Decode(r, &lineInformation); err != nil {
-				log.Println(err)
+			rs, err := s.etaxTransRepo.GetById(etaxTable.DOCUMENT_ID, etaxTable.COMPANY)
+			if err != nil {
+				logs.Error(err)
 				continue
 			}
-			lineInformations = append(lineInformations, lineInformation)
+			for _, r := range rs {
+				var lineInformation LineItemInformation
+				if mapstructure.Decode(r, &lineInformation); err != nil {
+					logs.Error(err)
+					continue
+				}
+				lineInformations = append(lineInformations, lineInformation)
+			}
+
+			docData.LineItemInformation = lineInformations
+			if mapstructure.Decode(etaxTable, &docData); err != nil {
+				logs.Error(err)
+				continue
+			}
+			response.DocData = docData
+			t, _ := s.Transform(&response.DocData)
+			_ = t
+
+			if err = s.etaxTableRepo.SqlUpdate(&etaxTable); err != nil {
+				return nil, err
+			}
+
+			responses = append(responses, response)
 		}
 
-		docData.LineItemInformation = lineInformations
-		if mapstructure.Decode(etaxTable, &docData); err != nil {
-			log.Println(err)
-			continue
-		}
-		response.DocData = docData
-		t, _ := s.Transform(&response.DocData)
-		_ = t
-		fmt.Println(response.DocData)
-		// b, f := strings.CutSuffix(response.DocData.DOCUMENT_ISSUE_DTM, "Z")
-		// if f == true {
-
-		// 	response.DocData.DOCUMENT_ISSUE_DTM = b
-		// }
-		// b, f = strings.CutSuffix(response.DocData.REF_DOCUMENT_ISSUE_DTM, "Z")
-		// if f == true {
-		// 	response.DocData.REF_DOCUMENT_ISSUE_DTM = b
-		// }
-		// if len(response.DocData.CREATE_PURPOSE) == 0 || len(response.DocData.CREATE_PURPOSE_CODE) == 0 {
-		// 	response.DocData.REF_DOCUMENT_ID = ""
-		// 	response.DocData.REF_DOCUMENT_ISSUE_DTM = ""
-		// 	response.DocData.REF_DOCUMENT_TYPE_CODE = ""
-		// }
-		if err = s.etaxTableRepo.SqlUpdate(&etaxTable); err != nil {
-			return nil, err
-		}
-
-		responses = append(responses, response)
+		return responses, nil
 	}
-	return responses, nil
+	logs.Debug("No avilable document to sign ETAX")
+	return nil, nil
 }
 
 func (s etaxService) Transform(p *DocData) (*DocData, error) {

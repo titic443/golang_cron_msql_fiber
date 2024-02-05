@@ -3,7 +3,6 @@ package repository
 import (
 	"encoding/base64"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -36,18 +35,18 @@ func (rp fileshareRepository) DownloadFile(doc string) error {
 			v1 := fmt.Sprintf("%v/%v", rp.workdir, file.Name())
 			fileByte, _ := fs.ReadFile(v1)
 			if err != nil {
-				log.Println(err)
+				return err
 			}
 			v2 := fmt.Sprintf("./download/%v", file.Name())
 			_ = v2
 			lfs, err := os.Create(v2)
 			if err != nil {
-				log.Println(err)
+				return err
 			}
 
 			_, err = lfs.Write(fileByte)
 			if err != nil {
-				log.Println(err)
+				return err
 			}
 
 		}
@@ -73,7 +72,7 @@ func (rp fileshareRepository) DecodeFile(doc string) (*string, error) {
 			v1 := fmt.Sprintf("%v/%v", rp.workdir, file.Name())
 			fileByte, _ := fs.ReadFile(v1)
 			if err != nil {
-				log.Println(err)
+				return nil, err
 			}
 
 			rawEncode := base64.StdEncoding.EncodeToString(fileByte)
