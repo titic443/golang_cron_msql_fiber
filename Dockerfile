@@ -12,4 +12,4 @@ COPY --from=builder /app/config.yaml .
 COPY --from=builder /app/main .
 EXPOSE 8888
 
-# CMD [ "/app/main" ]
+CMD [ "/app/main" ]
