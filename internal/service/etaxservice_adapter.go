@@ -64,9 +64,9 @@ func (s etaxService) SignEtax() ([]ResponseData, error) {
 			t, _ := s.Transform(&response.DocData)
 			_ = t
 
-			if err = s.etaxTableRepo.SqlUpdate(&etaxTable); err != nil {
-				return nil, err
-			}
+			// if err = s.etaxTableRepo.SqlUpdate(&etaxTable); err != nil {
+			// 	return nil, err
+			// }
 
 			responses = append(responses, response)
 		}
@@ -108,4 +108,11 @@ func (s etaxService) EncodePdf(docId string) (*string, error) {
 		return nil, err
 	}
 	return o, nil
+}
+
+func (s etaxService) SqlUpdateSuccess(docId string) error {
+	if err := s.etaxTableRepo.SqlUpdate(docId); err != nil {
+		return err
+	}
+	return nil
 }

@@ -45,5 +45,5 @@ type EtaxTable struct {
 type EtaxTableRepository interface {
 	SqlGetAll() ([]EtaxTable, error)
 	// SqlGetById(int) (*EtaxTable, error)
-	SqlUpdate(*EtaxTable) error
+	SqlUpdate(string) error
 }

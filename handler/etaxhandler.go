@@ -3,8 +3,9 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"go-etax/internal/logs"
 	"go-etax/internal/service"
+	"io"
 
 	"net/http"
 
@@ -40,7 +41,13 @@ func (h etaxTableHandler) SendEtaxToEco(c *fiber.Ctx) error {
 			panic(err)
 		}
 
-		fmt.Println(res)
+		if res.StatusCode != 200 {
+			b, _ := io.ReadAll(res.Body)
+			logs.Error(b)
+
+		} else {
+			h.etaxTableSrv.SqlUpdateSuccess(v.DocData.DOCUMENT_ID)
+		}
 	}
 
 	return c.JSON(o)

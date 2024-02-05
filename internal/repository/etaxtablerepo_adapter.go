@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"go-etax/internal/logs"
+
 	_ "gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 )
@@ -19,13 +21,16 @@ func (rp etaxTableRepositoryDb) SqlGetAll() ([]EtaxTable, error) {
 	if r.Error != nil {
 		return nil, r.Error
 	}
+	logs.Info("SELECT STATUS_SIGN = 0")
 	return etaxTables, nil
 }
 
-func (rp etaxTableRepositoryDb) SqlUpdate(etaxTable *EtaxTable) error {
-	r := rp.db.Table("EA_TMPINVOICEETAXTABLE").Model(&etaxTable).Update("STATUS_SIGN", 1)
+func (rp etaxTableRepositoryDb) SqlUpdate(docId string) error {
+	r := rp.db.Table("EA_TMPINVOICEETAXTABLE").Where("DOCUMENT_ID = ?", docId).Update("STATUS_SIGN", 1)
+	// r := rp.db.Table("EA_TMPINVOICEETAXTABLE").Model(&etaxTable).Update("STATUS_SIGN", 1)
 	if r.Error != nil {
 		return r.Error
 	}
+	logs.Info("Update STATUS_SIGN = 1 ON " + docId)
 	return nil
 }

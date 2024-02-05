@@ -1,6 +1,9 @@
 package logs
 
 import (
+	"encoding/json"
+	"strings"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -34,6 +37,15 @@ func Error(msg interface{}, fields ...zapcore.Field) {
 		log.Error(v.Error(), fields...)
 	case string:
 		log.Error(v, fields...)
+	case []byte:
+		// var out bytes.Buffer
+
+		var msg map[string]interface{}
+		json.Unmarshal(v, &msg)
+		v, _ = json.Marshal(msg["_server_messages"])
+		vs := string(v)
+		rfm := strings.ReplaceAll(vs, `\\\`, "")
+		log.Error(rfm, fields...)
 	}
 
 }

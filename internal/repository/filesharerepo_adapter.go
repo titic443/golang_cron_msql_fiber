@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/hirochachacha/go-smb2"
 )
 
@@ -81,6 +82,6 @@ func (rp fileshareRepository) DecodeFile(doc string) (*string, error) {
 
 		}
 	}
-
+	log.Info("ENCODE PDF FILE SUCCESS " + doc)
 	return &o, nil
 }

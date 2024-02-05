@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"go-etax/internal/logs"
+
 	"gorm.io/gorm"
 )
 
@@ -18,6 +20,6 @@ func (rp etaxTransRepositoryDb) GetById(document_id string, company string) ([]E
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
+	logs.Info("SELECT ETAX_TRANS ON " + document_id)
 	return i, nil
 }
