@@ -13,6 +13,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hirochachacha/go-smb2"
+	"github.com/robfig/cron"
 	"github.com/spf13/viper"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
@@ -67,6 +68,14 @@ func main() {
 	app.Get("/etax", etaxTableHandler.SendEtaxToEco)
 
 	logs.Info("App Sign ETAX listening on port" + viper.GetString("app.port"))
+	logs.Info("Create cronjob (0 */30 * * *)")
+	c := cron.New()
+	c.AddFunc("0 */30 * * *", func() {
+		etaxTableHandler.SendEtaxToEcoCronjob()
+		logs.Info("[Job 1]Every 30 minute job\n")
+	})
+	logs.Info("Start cronjob (0 */30 * * *)")
+	c.Start()
 	app.Listen(":8888")
 }
 
