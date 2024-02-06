@@ -31,9 +31,9 @@ func main() {
 
 	d := &smb2.Dialer{
 		Initiator: &smb2.NTLMInitiator{
-			User:     "titi.cha",
-			Password: "For+ever17!",
-			Domain:   "energyabsolute",
+			User:     viper.GetString("smb.username"),
+			Password: viper.GetString("smb.password"),
+			// Domain:   "energyabsolute",
 		},
 	}
 
@@ -62,7 +62,7 @@ func main() {
 
 	etaxTableRepository := repository.NewEtaxTableRepositoryDb(db)
 	etaxTransRepository := repository.NewEtaxTransRepositoryDb(db)
-	fileshareRepository := repository.NewfileshareRepository(client, "it-data$", "TESTApp")
+	fileshareRepository := repository.NewfileshareRepository(client, viper.GetString("smb.share"), viper.GetString("smb.folder"))
 	etaxTableService := service.NewEtaxTableService(etaxTableRepository, etaxTransRepository, fileshareRepository)
 	etaxTableHandler := handler.NewEtaxTableHandler(etaxTableService)
 	app.Get("/etax", etaxTableHandler.SendEtaxToEco)
