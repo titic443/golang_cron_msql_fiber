@@ -20,6 +20,22 @@ func NewfileshareRepository(client *smb2.Client, share string, workdir string) f
 	return fileshareRepository{client: client, share: share, workdir: workdir}
 }
 
+func (rp fileshareRepository) ListFile() error {
+	fs, err := rp.client.Mount(rp.share)
+	if err != nil {
+		return err
+	}
+	files, err := fs.ReadDir(rp.workdir)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		fmt.Println(file.Name())
+	}
+	return nil
+}
+
 func (rp fileshareRepository) DownloadFile(doc string) error {
 	fs, err := rp.client.Mount(rp.share)
 	if err != nil {

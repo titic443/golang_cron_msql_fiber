@@ -9,8 +9,10 @@ db:
   db: EAVCAX62LIVE
 
 smb:
-  hostname: 10.15.5.4
+  hostname: 192.168.242.62
   port: 445
-  username: titi.cha
-  passwor: For+ever17!
+  username: smb-etax
+  password: etx#Upload24
   domain: energyabsolute
+  share: datax
+  folder: TESTApp

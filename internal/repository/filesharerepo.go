@@ -7,4 +7,5 @@ type FileshareRepoStruct struct {
 type FileshareRepository interface {
 	DownloadFile(string) error
 	DecodeFile(string) (*string, error)
+	ListFile() error
 }
