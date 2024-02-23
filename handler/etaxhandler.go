@@ -40,7 +40,7 @@ func (h etaxTableHandler) SendEtaxToEco(c *fiber.Ctx) error {
 		r.Header.Add("Content-Type", "application/json")
 		r.Header.Add("Authorization", token)
 		client := &http.Client{}
-		http.DefaultClient.Timeout = 2 * time.Second
+		http.DefaultClient.Timeout = 5 * time.Second
 		res, err := client.Do(r)
 		if err != nil {
 			panic(err)
