@@ -43,7 +43,7 @@ func (h etaxTableHandler) SendEtaxToEco(c *fiber.Ctx) error {
 		http.DefaultClient.Timeout = 5 * time.Second
 		res, err := client.Do(r)
 		if err != nil {
-			panic(err)
+			logs.Error(err)
 		}
 		defer res.Body.Close()
 
