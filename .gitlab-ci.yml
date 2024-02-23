@@ -13,4 +13,6 @@ docker-build:
   script:
     - docker build --build-arg ENVCHK=production --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+  after_script:
+    - docker run --rm "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" sh -c "apk --no-cache add telnet && telnet --version"
   #test-tag no tags
