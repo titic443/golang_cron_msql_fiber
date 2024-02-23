@@ -41,7 +41,12 @@ func (s *etaxService) SignEtax() ([]ResponseData, error) {
 				logs.Error(err)
 				// return nil, err
 			}
-			response.PDF_CONTENT = *o
+			if o != nil {
+
+				response.PDF_CONTENT = *o
+			} else {
+				response.PDF_CONTENT = ""
+			}
 
 			rs, err := s.etaxTransRepo.GetById(etaxTable.DOCUMENT_ID, etaxTable.COMPANY)
 			if err != nil {
