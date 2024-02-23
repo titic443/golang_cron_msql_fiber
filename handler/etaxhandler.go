@@ -40,10 +40,10 @@ func (h etaxTableHandler) SendEtaxToEco(c *fiber.Ctx) error {
 		r.Header.Add("Authorization", token)
 		client := &http.Client{}
 		res, err := client.Do(r)
-		res.Body.Close()
 		if err != nil {
 			panic(err)
 		}
+		defer res.Body.Close()
 
 		if res.StatusCode != 200 {
 			b, _ := io.ReadAll(res.Body)
