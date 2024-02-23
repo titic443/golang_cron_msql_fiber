@@ -16,11 +16,11 @@ type fileshareRepository struct {
 	workdir string
 }
 
-func NewfileshareRepository(client *smb2.Client, share string, workdir string) fileshareRepository {
-	return fileshareRepository{client: client, share: share, workdir: workdir}
+func NewfileshareRepository(client *smb2.Client, share string, workdir string) *fileshareRepository {
+	return &fileshareRepository{client: client, share: share, workdir: workdir}
 }
 
-func (rp fileshareRepository) ListFile() error {
+func (rp *fileshareRepository) ListFile() error {
 	fs, err := rp.client.Mount(rp.share)
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (rp fileshareRepository) ListFile() error {
 	return nil
 }
 
-func (rp fileshareRepository) DownloadFile(doc string) error {
+func (rp *fileshareRepository) DownloadFile(doc string) error {
 	fs, err := rp.client.Mount(rp.share)
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func (rp fileshareRepository) DownloadFile(doc string) error {
 	return nil
 }
 
-func (rp fileshareRepository) DecodeFile(doc string) (*string, error) {
+func (rp *fileshareRepository) DecodeFile(doc string) (*string, error) {
 	var o string
 	fs, err := rp.client.Mount(rp.share)
 	if err != nil {

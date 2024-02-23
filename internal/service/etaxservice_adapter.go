@@ -15,11 +15,11 @@ type etaxService struct {
 	fileshareRepo repository.FileshareRepository
 }
 
-func NewEtaxTableService(etaxTableRepo repository.EtaxTableRepository, etaxTransRepo repository.EtaxTransRepository, fileshareRepo repository.FileshareRepository) etaxService {
-	return etaxService{etaxTableRepo: etaxTableRepo, etaxTransRepo: etaxTransRepo, fileshareRepo: fileshareRepo}
+func NewEtaxTableService(etaxTableRepo repository.EtaxTableRepository, etaxTransRepo repository.EtaxTransRepository, fileshareRepo repository.FileshareRepository) *etaxService {
+	return &etaxService{etaxTableRepo: etaxTableRepo, etaxTransRepo: etaxTransRepo, fileshareRepo: fileshareRepo}
 }
 
-func (s etaxService) SignEtax() ([]ResponseData, error) {
+func (s *etaxService) SignEtax() ([]ResponseData, error) {
 	etaxTables, err := s.etaxTableRepo.SqlGetAll()
 	if err != nil {
 		logs.Error(err)
@@ -79,7 +79,7 @@ func (s etaxService) SignEtax() ([]ResponseData, error) {
 	return nil, nil
 }
 
-func (s etaxService) Transform(p *DocData) (*DocData, error) {
+func (s *etaxService) Transform(p *DocData) (*DocData, error) {
 	if len(p.LineItemInformation) > 0 {
 		for _, lineItem := range p.LineItemInformation {
 			ok := strings.Contains(lineItem.LINE_TAX_TYPE_CODE, "VUD")
@@ -104,7 +104,7 @@ func (s etaxService) Transform(p *DocData) (*DocData, error) {
 	return p, nil
 }
 
-func (s etaxService) EncodePdf(docId string) (*string, error) {
+func (s *etaxService) EncodePdf(docId string) (*string, error) {
 	o, err := s.fileshareRepo.DecodeFile(docId)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (s etaxService) EncodePdf(docId string) (*string, error) {
 	return o, nil
 }
 
-func (s etaxService) SqlUpdateSuccess(docId string) error {
+func (s *etaxService) SqlUpdateSuccess(docId string) error {
 	if err := s.etaxTableRepo.SqlUpdate(docId); err != nil {
 		return err
 	}
