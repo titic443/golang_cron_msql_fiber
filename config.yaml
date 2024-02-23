@@ -16,3 +16,7 @@ smb:
   domain: energyabsolute
   share: datax
   folder: TESTApp
+
+api:
+  url: https://etax.energyabsolute.co.th/api/method/etax_inet.api.etax.sign_etax_document
+  token: d2285083fd972ce:9854a5d7c33828c

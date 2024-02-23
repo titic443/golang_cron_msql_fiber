@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"go-etax/internal/logs"
 	"go-etax/internal/repository"
 	"strings"
@@ -34,6 +35,7 @@ func (s etaxService) SignEtax() ([]ResponseData, error) {
 				logs.Error(err)
 				// return nil, err
 			}
+			fmt.Println(etaxTable.DOCUMENT_ID)
 			o, err := s.EncodePdf(etaxTable.DOCUMENT_ID)
 			if err != nil {
 				logs.Error(err)
