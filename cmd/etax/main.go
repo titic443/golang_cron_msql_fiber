@@ -47,7 +47,10 @@ func main() {
 	logs.Info("Create cronjob (0 */30 * * *)")
 	c := cron.New()
 	c.AddFunc("0 */30 * * *", func() {
-		etaxTableHandler.SendEtaxToEcoCronjob()
+		err := etaxTableHandler.SendEtaxToEcoCronjob()
+		if err != nil {
+			logs.Error(err)
+		}
 		logs.Info("[Job 1]Every 30 minute job\n")
 	})
 

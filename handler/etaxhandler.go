@@ -91,5 +91,5 @@ func (h etaxTableHandler) SendEtaxToEcoCronjob(cronEntries ...[]cron.Entry) erro
 			h.etaxTableSrv.SqlUpdateSuccess(v.DocData.DOCUMENT_ID)
 		}
 	}
-	return nil
+	return err
 }
