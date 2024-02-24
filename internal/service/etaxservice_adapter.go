@@ -1,25 +1,33 @@
 package service
 
 import (
-	"fmt"
 	"go-etax/internal/logs"
 	"go-etax/internal/repository"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/viper"
 )
 
 type etaxService struct {
 	etaxTableRepo repository.EtaxTableRepository
 	etaxTransRepo repository.EtaxTransRepository
-	fileshareRepo repository.FileshareRepository
 }
 
-func NewEtaxTableService(etaxTableRepo repository.EtaxTableRepository, etaxTransRepo repository.EtaxTransRepository, fileshareRepo repository.FileshareRepository) *etaxService {
-	return &etaxService{etaxTableRepo: etaxTableRepo, etaxTransRepo: etaxTransRepo, fileshareRepo: fileshareRepo}
+func NewEtaxTableService(etaxTableRepo repository.EtaxTableRepository, etaxTransRepo repository.EtaxTransRepository) *etaxService {
+	return &etaxService{etaxTableRepo: etaxTableRepo, etaxTransRepo: etaxTransRepo}
 }
 
 func (s *etaxService) SignEtax() ([]ResponseData, error) {
+	u := User{
+		serverIP:     viper.GetString("smb.hostname"),
+		userName:     viper.GetString("smb.username"),
+		userPassword: viper.GetString("smb.password"),
+		shareName:    viper.GetString("smb.share"),
+		folder:       viper.GetString("smb.folder"),
+	}
+	session, _ := connectSMBserver(u)
+	share := getMount(session, u.shareName)
 	etaxTables, err := s.etaxTableRepo.SqlGetAll()
 	if err != nil {
 		logs.Error(err)
@@ -33,13 +41,11 @@ func (s *etaxService) SignEtax() ([]ResponseData, error) {
 			var docData DocData
 			if mapstructure.Decode(etaxTable, &response); err != nil {
 				logs.Error(err)
-				// return nil, err
 			}
-			fmt.Println(etaxTable.DOCUMENT_ID)
-			o, err := s.EncodePdf(etaxTable.DOCUMENT_ID)
+			doc := etaxTable.DOCUMENT_ID
+			o, err := DecodeFile(share, u.folder, doc)
 			if err != nil {
 				logs.Error(err)
-				// return nil, err
 			}
 			if o != nil {
 
@@ -70,10 +76,6 @@ func (s *etaxService) SignEtax() ([]ResponseData, error) {
 			response.DocData = docData
 			t, _ := s.Transform(&response.DocData)
 			_ = t
-
-			// if err = s.etaxTableRepo.SqlUpdate(&etaxTable); err != nil {
-			// 	return nil, err
-			// }
 
 			responses = append(responses, response)
 		}
@@ -107,14 +109,6 @@ func (s *etaxService) Transform(p *DocData) (*DocData, error) {
 		p.REF_DOCUMENT_TYPE_CODE = ""
 	}
 	return p, nil
-}
-
-func (s *etaxService) EncodePdf(docId string) (*string, error) {
-	o, err := s.fileshareRepo.DecodeFile(docId)
-	if err != nil {
-		return nil, err
-	}
-	return o, nil
 }
 
 func (s *etaxService) SqlUpdateSuccess(docId string) error {

@@ -58,6 +58,5 @@ type LineItemInformation struct {
 type EtaxService interface {
 	SignEtax() ([]ResponseData, error)
 	Transform(*DocData) (*DocData, error)
-	EncodePdf(string) (*string, error)
 	SqlUpdateSuccess(string) error
 }
