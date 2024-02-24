@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/base64"
 	"fmt"
+	"go-etax/internal/logs"
 	"os"
 	"strings"
 
@@ -21,18 +22,22 @@ func NewfileshareRepository(client *smb2.Client, share string, workdir string) *
 }
 
 func (rp *fileshareRepository) ListFile() error {
+	fmt.Println("List file")
 	fs, err := rp.client.Mount(rp.share)
 	if err != nil {
+		logs.Error(err)
 		return err
 	}
 	files, err := fs.ReadDir(rp.workdir)
 	if err != nil {
+		logs.Error(err)
 		return err
 	}
 
 	for _, file := range files {
 		fmt.Println(file.Name())
 	}
+	fmt.Println("LIst file end")
 	return nil
 }
 

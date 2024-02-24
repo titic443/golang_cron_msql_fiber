@@ -6,13 +6,11 @@ import (
 	"go-etax/internal/logs"
 	"go-etax/internal/repository"
 	"go-etax/internal/service"
-	"net"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/hirochachacha/go-smb2"
 	"github.com/robfig/cron"
 	"github.com/spf13/viper"
 	"gorm.io/driver/sqlserver"
@@ -23,27 +21,6 @@ func main() {
 	var err error
 	initConfig()
 	initTimeZone()
-	dsn := fmt.Sprintf("%v:%v", viper.GetString("smb.hostname"), viper.GetString("smb.port"))
-	conn, err := net.Dial("tcp", dsn)
-	if err != nil {
-		panic(err)
-	}
-
-	d := &smb2.Dialer{
-		Initiator: &smb2.NTLMInitiator{
-			User:     viper.GetString("smb.username"),
-			Password: viper.GetString("smb.password"),
-			// Domain:   "energyabsolute",
-		},
-	}
-
-	client, err := d.Dial(conn)
-	if err != nil {
-		panic(err)
-	}
-
-	defer client.Logoff()
-	defer conn.Close()
 
 	app := fiber.New(fiber.Config{
 		Prefork: false,
@@ -54,7 +31,7 @@ func main() {
 		os.Mkdir("./download", 0777)
 	}
 
-	dsn = fmt.Sprintf("sqlserver://%s:%s@%s:%v?database=%s&encrypt=disable&connection+timeout=30", viper.GetString("db.username"), viper.GetString("db.password"), viper.GetString("db.hostname"), viper.GetInt("db.port"), viper.GetString("db.db"))
+	dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%v?database=%s&encrypt=disable&connection+timeout=30", viper.GetString("db.username"), viper.GetString("db.password"), viper.GetString("db.hostname"), viper.GetInt("db.port"), viper.GetString("db.db"))
 	db, err := gorm.Open(sqlserver.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -62,10 +39,9 @@ func main() {
 
 	etaxTableRepository := repository.NewEtaxTableRepositoryDb(db)
 	etaxTransRepository := repository.NewEtaxTransRepositoryDb(db)
-	fileshareRepository := repository.NewfileshareRepository(client, viper.GetString("smb.share"), viper.GetString("smb.folder"))
-	etaxTableService := service.NewEtaxTableService(etaxTableRepository, etaxTransRepository, fileshareRepository)
+	etaxTableService := service.NewEtaxTableService(etaxTableRepository, etaxTransRepository)
 	etaxTableHandler := handler.NewEtaxTableHandler(etaxTableService)
-	app.Get("/etax", etaxTableHandler.ListFile)
+	app.Get("/etax", etaxTableHandler.SendEtaxToEco)
 
 	logs.Info("App Sign ETAX listening on port" + viper.GetString("app.port"))
 	logs.Info("Create cronjob (0 */30 * * *)")
@@ -77,12 +53,6 @@ func main() {
 
 	logs.Info("Start cronjob (0 */30 * * *)")
 
-	c.AddFunc("0 */5 * * *", func() {
-		etaxTableHandler.ListFileCronjob()
-		logs.Info("[Job 1]Every 5 minute job\n")
-	})
-
-	logs.Info("Start cronjob (0 */5 * * *)")
 	c.Start()
 	app.Listen(":8888")
 }
