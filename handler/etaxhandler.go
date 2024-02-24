@@ -76,12 +76,13 @@ func (h etaxTableHandler) SendEtaxToEcoCronjob(cronEntries ...[]cron.Entry) erro
 		r.Header.Add("Content-Type", "application/json")
 		r.Header.Add("Authorization", token)
 		client := &http.Client{}
+		http.DefaultClient.Timeout = 5 * time.Second
 		res, err := client.Do(r)
 
 		if err != nil {
 			logs.Error(err)
 		}
-
+		defer res.Body.Close()
 		if res.StatusCode != 200 {
 			b, _ := io.ReadAll(res.Body)
 			logs.Error(b)
