@@ -123,3 +123,7 @@ func (s *etaxService) SqlUpdateSuccess(docId string) error {
 	}
 	return nil
 }
+
+func (s *etaxService) ListFile() {
+	s.fileshareRepo.ListFile()
+}

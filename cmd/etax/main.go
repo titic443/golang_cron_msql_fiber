@@ -65,7 +65,7 @@ func main() {
 	fileshareRepository := repository.NewfileshareRepository(client, viper.GetString("smb.share"), viper.GetString("smb.folder"))
 	etaxTableService := service.NewEtaxTableService(etaxTableRepository, etaxTransRepository, fileshareRepository)
 	etaxTableHandler := handler.NewEtaxTableHandler(etaxTableService)
-	app.Get("/etax", etaxTableHandler.SendEtaxToEco)
+	app.Get("/etax", etaxTableHandler.ListFile)
 
 	logs.Info("App Sign ETAX listening on port" + viper.GetString("app.port"))
 	logs.Info("Create cronjob (0 */30 * * *)")
@@ -74,7 +74,15 @@ func main() {
 		etaxTableHandler.SendEtaxToEcoCronjob()
 		logs.Info("[Job 1]Every 30 minute job\n")
 	})
+
 	logs.Info("Start cronjob (0 */30 * * *)")
+
+	c.AddFunc("0 */5 * * *", func() {
+		etaxTableHandler.ListFileCronjob()
+		logs.Info("[Job 1]Every 5 minute job\n")
+	})
+
+	logs.Info("Start cronjob (0 */5 * * *)")
 	c.Start()
 	app.Listen(":8888")
 }

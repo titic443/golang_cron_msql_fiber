@@ -60,4 +60,5 @@ type EtaxService interface {
 	Transform(*DocData) (*DocData, error)
 	EncodePdf(string) (*string, error)
 	SqlUpdateSuccess(string) error
+	ListFile()
 }

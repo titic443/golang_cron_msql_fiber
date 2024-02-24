@@ -22,7 +22,20 @@ type etaxTableHandler struct {
 }
 
 func NewEtaxTableHandler(etaxTableSrv service.EtaxService) etaxTableHandler {
+
 	return etaxTableHandler{etaxTableSrv: etaxTableSrv}
+}
+
+func (h etaxTableHandler) ListFile(c *fiber.Ctx) error {
+	fmt.Println("-------------------")
+	h.etaxTableSrv.ListFile()
+	return nil
+}
+
+func (h etaxTableHandler) ListFileCronjob(cronEntries ...[]cron.Entry) error {
+	fmt.Println("-------------------")
+	h.etaxTableSrv.ListFile()
+	return nil
 }
 
 func (h etaxTableHandler) SendEtaxToEco(c *fiber.Ctx) error {
@@ -76,7 +89,7 @@ func (h etaxTableHandler) SendEtaxToEcoCronjob(cronEntries ...[]cron.Entry) erro
 		res, err := client.Do(r)
 
 		if err != nil {
-			panic(err)
+			logs.Error(err)
 		}
 
 		if res.StatusCode != 200 {
