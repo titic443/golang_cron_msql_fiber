@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"go-etax/internal/logs"
@@ -33,6 +34,9 @@ func (h etaxTableHandler) SendEtaxToEco(c *fiber.Ctx) error {
 	if err != nil {
 		logs.Error(err)
 	}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	for _, v := range o {
 		obyte, _ := json.Marshal(v)
 
@@ -40,7 +44,7 @@ func (h etaxTableHandler) SendEtaxToEco(c *fiber.Ctx) error {
 
 		r.Header.Add("Content-Type", "application/json")
 		r.Header.Add("Authorization", token)
-		client := &http.Client{}
+		client := &http.Client{Transport: tr}
 		http.DefaultClient.Timeout = 5 * time.Second
 		res, err := client.Do(r)
 		if err != nil {
@@ -65,6 +69,10 @@ func (h etaxTableHandler) SendEtaxToEcoCronjob(cronEntries ...[]cron.Entry) erro
 	url := viper.GetString("api.url")
 	token := fmt.Sprintf("token %s", viper.GetString("api.token"))
 	o, err := h.etaxTableSrv.SignEtax()
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
 	if err != nil {
 		log.Error(err)
 	}
@@ -75,7 +83,7 @@ func (h etaxTableHandler) SendEtaxToEcoCronjob(cronEntries ...[]cron.Entry) erro
 
 		r.Header.Add("Content-Type", "application/json")
 		r.Header.Add("Authorization", token)
-		client := &http.Client{}
+		client := &http.Client{Transport: tr}
 		http.DefaultClient.Timeout = 5 * time.Second
 		res, err := client.Do(r)
 
