@@ -44,17 +44,25 @@ func (h etaxTableHandler) SendEtaxToEco(c *fiber.Ctx) error {
 
 		r.Header.Add("Content-Type", "application/json")
 		r.Header.Add("Authorization", token)
+		// client := &http.Client{}
 		client := &http.Client{Transport: tr}
 		http.DefaultClient.Timeout = 5 * time.Second
 		res, err := client.Do(r)
 		if err != nil {
 			logs.Error(err)
 		}
-		// defer res.Body.Close()
-
+		defer res.Body.Close()
+		fmt.Println(*res)
 		if res.StatusCode != 200 {
+			var trace map[string]interface{}
 			b, _ := io.ReadAll(res.Body)
-			logs.Error(b)
+			_ = json.Unmarshal(b, &trace)
+			if serverMessages, ok := trace["_server_messages"]; ok {
+				logs.Error(serverMessages)
+			} else {
+
+				logs.Error(string(b))
+			}
 
 		} else {
 			h.etaxTableSrv.SqlUpdateSuccess(v.DocData.DOCUMENT_ID)
@@ -92,8 +100,15 @@ func (h etaxTableHandler) SendEtaxToEcoCronjob(cronEntries ...[]cron.Entry) erro
 		}
 		// defer res.Body.Close()
 		if res.StatusCode != 200 {
+			var trace map[string]interface{}
 			b, _ := io.ReadAll(res.Body)
-			logs.Error(b)
+			_ = json.Unmarshal(b, &trace)
+			if serverMessages, ok := trace["_server_messages"]; ok {
+				logs.Error(serverMessages)
+			} else {
+
+				logs.Error(string(b))
+			}
 
 		} else {
 			h.etaxTableSrv.SqlUpdateSuccess(v.DocData.DOCUMENT_ID)
