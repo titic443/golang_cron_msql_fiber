@@ -46,7 +46,7 @@ func (h etaxTableHandler) SendEtaxToEco(c *fiber.Ctx) error {
 		if err != nil {
 			logs.Error(err)
 		}
-		defer res.Body.Close()
+		// defer res.Body.Close()
 
 		if res.StatusCode != 200 {
 			b, _ := io.ReadAll(res.Body)
@@ -82,7 +82,7 @@ func (h etaxTableHandler) SendEtaxToEcoCronjob(cronEntries ...[]cron.Entry) erro
 		if err != nil {
 			logs.Error(err)
 		}
-		defer res.Body.Close()
+		// defer res.Body.Close()
 		if res.StatusCode != 200 {
 			b, _ := io.ReadAll(res.Body)
 			logs.Error(b)
