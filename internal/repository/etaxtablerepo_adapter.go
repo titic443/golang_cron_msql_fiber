@@ -17,7 +17,7 @@ func NewEtaxTableRepositoryDb(db *gorm.DB) *etaxTableRepositoryDb {
 
 func (rp *etaxTableRepositoryDb) SqlGetAll() ([]EtaxTable, error) {
 	etaxTables := []EtaxTable{}
-	r := rp.db.Table("EA_TMPINVOICEETAXTABLE").Find(&etaxTables, "STATUS_SIGN = ?", 0)
+	r := rp.db.Table("TMPINVOICEETAXTABLE").Find(&etaxTables, "STATUS_SIGN = ?", 0)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -26,7 +26,7 @@ func (rp *etaxTableRepositoryDb) SqlGetAll() ([]EtaxTable, error) {
 }
 
 func (rp *etaxTableRepositoryDb) SqlUpdate(docId string) error {
-	r := rp.db.Table("EA_TMPINVOICEETAXTABLE").Where("DOCUMENT_ID = ?", docId).Update("STATUS_SIGN", 1)
+	r := rp.db.Table("TMPINVOICEETAXTABLE").Where("DOCUMENT_ID = ?", docId).Update("STATUS_SIGN", 1)
 	// r := rp.db.Table("EA_TMPINVOICEETAXTABLE").Model(&etaxTable).Update("STATUS_SIGN", 1)
 	if r.Error != nil {
 		return r.Error
